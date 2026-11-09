@@ -1,0 +1,50 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: tutorconnect_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: tutorconnect_db
+      MYSQL_USER: tutor_user
+      MYSQL_PASSWORD: TutorUnves2026!
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "tutor_user", "-ptutor_pass"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: tutorconnect_backend
+    environment:
+      - DATABASE_URL=mysql+pymysql://tutor_user:TutorUnves2026!@db:3306/tutorconnect_db
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USER=fergome708@gmail.com
+      - SMTP_PASSWORD=ewdl cgey fbcw ihwk
+      - FROM_EMAIL=tutorconnect@fp-unves.edu.py
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tutorconnect_frontend
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
+  uploads_data:
